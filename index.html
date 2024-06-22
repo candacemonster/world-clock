@@ -12,28 +12,13 @@
     <div class="container">
         <h1>World Clock</h1>
 
-        <select>
-            <option value="">Select a city...</option>
-            <option value="">New York</option>
-            <option value="">Las Vegas</option>
-            <option value="">Kona</option>
-            <option value="">Seoul</option>
+        <select id="city">
+            <option value="">Select a city</option>
+            <!-- Options will be populated by JavaScript -->
         </select>
 
-        <div class="city" id="las-vegas">
-            <div>
-                <h2>Las Vegas 🇺🇸 | UTC -7</h2>
-                <div class="date"></div>
-            </div>
-            <div class="time"></div>
-        </div>
-        <div class="city" id="zulu">
-            <div>
-                <h2>Zulu Time | UTC +0</h2>
-                <div class="date"></div>
-            </div>
-            <div class="time"></div>
-        </div>
+        <div id="zulu"></div>
+        <div id="opposite"></div>
     </div>
     <footer>Candace Coded Project | <a href="https://github.com/candacemonster/world-clock" target="_blank">Open Source on Github</a>.</footer>
     <script src="/javascript/index.js"></script>
