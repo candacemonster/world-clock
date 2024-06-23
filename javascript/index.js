@@ -67,6 +67,7 @@ const globalTimezones = [
       selectedCity = null; 
     }
     updateTime(); 
+  }
   
   document.addEventListener('DOMContentLoaded', (event) => {
     populateSelect();
