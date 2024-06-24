@@ -1,4 +1,4 @@
-const globalTimezones = [
+let globalTimezones = [
     "America/New_York",
     "America/Los_Angeles",
     "America/Chicago",
@@ -18,45 +18,25 @@ const globalTimezones = [
 let selectedCity = null;
 let userTimezone = moment.tz.guess();
 
-function updateTime() {
-    // Zulu Time
-    let zuluTime = moment().utc();
-    updateTimeDisplay("zulu", "Zulu Time (UTC+00:00)", zuluTime);
+document.addEventListener('DOMContentLoaded', () => {
+    populateSelect();
+    updateTime();
+    setInterval(updateTime, 1000);
 
-    // Selected City or Current Location
-    if (selectedCity) {
-        let cityTime = moment().tz(selectedCity);
-        let cityName = selectedCity.replace("_", " ").split("/")[1];
-        let utcOffset = cityTime.format("Z");
-        updateTimeDisplay("opposite", `${cityName} (UTC${utcOffset})`, cityTime);
-    } else if (userTimezone) {
-        let cityTime = moment().tz(userTimezone);
-        let cityName = "Current Location";
-        let utcOffset = cityTime.format("Z");
-        updateTimeDisplay("opposite", `${cityName} (UTC${utcOffset})`, cityTime);
-    }
-}
+    let select = document.getElementById('city');
+    select.addEventListener('change', updateCity);
 
-function updateTimeDisplay(elementId, title, time) {
-    let element = document.getElementById(elementId);
-    element.innerHTML = `
-      <div class="city">
-        <div>
-          <h2>${title}</h2>
-          <div class="date">${time.format("dddd, MMMM Do YYYY")}</div>
-        </div>
-        <div class="time">
-          ${time.format("h:mm:ss")}
-          <small>${time.format("A")}</small>
-        </div>
-      </div>
-    `;
-}
+    let returnToZuluBtn = document.getElementById('return-to-zulu');
+    returnToZuluBtn.addEventListener('click', () => {
+        selectedCity = null;
+        updateTime();
+    });
+});
 
 function populateSelect() {
-    const select = document.getElementById('city');
+    let select = document.getElementById('city');
     globalTimezones.forEach(timezone => {
-        const option = document.createElement('option');
+        let option = document.createElement('option');
         option.value = timezone;
         option.textContent = timezone.replace('_', ' ').split('/')[1];
         select.appendChild(option);
@@ -64,21 +44,36 @@ function populateSelect() {
 }
 
 function updateCity(event) {
-    const selectedValue = event.target.value;
-    if (selectedValue === "current") {
-        selectedValue = moment.tz.guess();
+    selectedCity = event.target.value === "current" ? userTimezone : event.target.value;
+    updateTime(userTimezone);
+}
+
+function updateTime() {
+    let zuluTime = moment().utc();
+    updateTimeDisplay("zulu", "Zulu Time (UTC+00:00)", zuluTime);
+
+    if (selectedCity) {
+        let cityTime = moment().tz(selectedCity);
+        let cityName = selectedCity === userTimezone ? "Current Location" : selectedCity.replace('_', ' ').split('/')[1];
+        let utcOffset = cityTime.format("Z");
+        updateTimeDisplay("opposite", `${cityName} (UTC${utcOffset})`, cityTime);
     } else {
-        selectedCity = selectedValue;
-        updateTime();
+        document.getElementById('opposite').innerHTML = '';
     }
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    populateSelect();
-    
-    const select = document.getElementById('city');
-    select.addEventListener('change', updateCity);
-
-    updateTime();
-    setInterval(updateTime, 1000);
-});
+function updateTimeDisplay(elementId, title, time) {
+    let element = document.getElementById(elementId);
+    element.innerHTML = `
+        <div class="city">
+            <div>
+                <h2>${title}</h2>
+                <div class="date">${time.format("dddd, MMMM Do YYYY")}</div>
+            </div>
+            <div class="time">
+                ${time.format("h:mm:ss")}
+                <small>${time.format("A")}</small>
+            </div>
+        </div>
+    `;
+}
