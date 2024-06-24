@@ -13,29 +13,31 @@ const globalTimezones = [
     "Asia/Shanghai",
     "Australia/Sydney",
     "Pacific/Auckland",
-  ];
-  
-  let selectedCity = null;
-  
-  function updateTime() {
+];
+
+let selectedCity = null;
+let userTimezone = moment.tz.guess();
+
+function updateTime() {
     // Zulu Time
     let zuluTime = moment().utc();
     updateTimeDisplay("zulu", "Zulu Time (UTC+00:00)", zuluTime);
-  
-    // Selected City or Opposite of Zulu Time
+
+    // Selected City or Current Location
     if (selectedCity) {
-      let cityTime = moment().tz(selectedCity);
-      let cityName = selectedCity.split("/")[1].replace("_", " ");
-      let utcOffset = cityTime.format("Z");
-      updateTimeDisplay("opposite", `${cityName} (UTC${utcOffset})`, cityTime);
-    } else {
-      // Opposite of Zulu Time (UTC-12:00)
-      let oppositeTime = moment().tz("Etc/GMT+12");
-      updateTimeDisplay("opposite", "Opposite Zulu (UTC-12:00)", oppositeTime);
+        let cityTime = moment().tz(selectedCity);
+        let cityName = selectedCity.replace("_", " ").split("/")[1];
+        let utcOffset = cityTime.format("Z");
+        updateTimeDisplay("opposite", `${cityName} (UTC${utcOffset})`, cityTime);
+    } else if (userTimezone) {
+        let cityTime = moment().tz(userTimezone);
+        let cityName = "Current Location";
+        let utcOffset = cityTime.format("Z");
+        updateTimeDisplay("opposite", `${cityName} (UTC${utcOffset})`, cityTime);
     }
-  }
-  
-  function updateTimeDisplay(elementId, title, time) {
+}
+
+function updateTimeDisplay(elementId, title, time) {
     let element = document.getElementById(elementId);
     element.innerHTML = `
       <div class="city">
@@ -49,32 +51,34 @@ const globalTimezones = [
         </div>
       </div>
     `;
-  }
-  
-  function populateSelect() {
+}
+
+function populateSelect() {
     const select = document.getElementById('city');
     globalTimezones.forEach(timezone => {
-      const option = document.createElement('option');
-      option.value = timezone;
-      option.textContent = timezone.split('/')[1].replace('_', ' ');
-      select.appendChild(option);
+        const option = document.createElement('option');
+        option.value = timezone;
+        option.textContent = timezone.replace('_', ' ').split('/')[1];
+        select.appendChild(option);
     });
-  }
-  
-  function updateCity(event) {
-    selectedCity = event.target.value;
-    if (!selectedCity) {
-      selectedCity = null; 
+}
+
+function updateCity(event) {
+    const selectedValue = event.target.value;
+    if (selectedValue === "current") {
+        selectedValue = moment.tz.guess();
+    } else {
+        selectedCity = selectedValue;
+        updateTime();
     }
-    updateTime(); 
-  }
-  
-  document.addEventListener('DOMContentLoaded', (event) => {
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
     populateSelect();
     
     const select = document.getElementById('city');
     select.addEventListener('change', updateCity);
-  
+
     updateTime();
     setInterval(updateTime, 1000);
-  });
+});
